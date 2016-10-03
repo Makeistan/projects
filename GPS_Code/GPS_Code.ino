@@ -16,14 +16,14 @@ void setup()
   Wire.onRequest(requestEvent); // regi
 }
   //3147636, 7434279
-
+unsigned long time=12000000, date, fix_age;
   long lat = 1000000, lon = 1000000;
 void requestEvent() {
-  String d = String(lat) + "," + String (lon);
-  char buffer[16];
- d.toCharArray(buffer, 16);
+  String d = String(lat) + "," + String (lon) + "," + String (time);
+  char buffer[26];
+  d.toCharArray(buffer, 26);
   Wire.write(buffer); // respond with message of 6 bytes
-   Serial.println(buffer);
+  Serial.println(buffer);
   // as expected by master
 }
 int x = 0;
@@ -38,10 +38,9 @@ void loop() // run over and over
           Serial.println("-------------");
     
           gps.get_position(&lat, &lon);
+          gps.get_datetime(&date, &time, &fix_age);
 
-
-
-          Serial.print("Lat/Long(10^-5 deg): "); Serial.print(lat); Serial.print(", "); Serial.print(lon); 
+          Serial.print("Lat/Long(10^-5 deg): "); Serial.print(lat); Serial.print(", "); Serial.print(lon); Serial.print(time); 
           //delay(500);
           Serial.println();
       }

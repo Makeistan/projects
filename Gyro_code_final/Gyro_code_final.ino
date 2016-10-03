@@ -43,7 +43,7 @@ int getgps=2; //This variable is used for controlling when to read the GPS coord
 int getgyro=2; //This variable is used for controlling when to get the data from Gyro
 int iter=0; // to count the number of iterations before reset is required, for debugging purposes
 unsigned long telapsed=0; // to keep track of the time being elapsed after every loop
-float pitch=0, roll=0; // pitch and roll is stored into these variables
+float yaw=0, pitch=0, roll=0; // pitch and roll is stored into these variables
 int bumpval=0; // pitch and roll are later combined into this variable
 LiquidCrystal lcd(12, 11, 6, 5, 4, 3); // initializing the 16x2 LCD
 
@@ -79,7 +79,7 @@ uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\
 class valuesPackage // a special class is created to keep two values of pitch as well as roll each time the code executes and the difference is later calculated to detect a road bump
 {
   public:
-    float p = 0, r =0; //pitch and roll's intermediate values before they are stored into an integer created above
+    float y=0, p = 0, r =0; //yaw pitch and roll's intermediate values before they are stored into an integer created above
 };
 
 int index = 0; // index is used for controlling the stabilizing time of the gyro
@@ -216,7 +216,7 @@ void loop() {
  myFile = SD.open("gyro_gps.txt", FILE_WRITE); //File is created and/or opened by Arduino
  //myFile.println();
  //myFile.println("took approximately 8 seconds to reset");
- Wire.requestFrom(8,15);    // request 15 bytes from slave device #8
+ Wire.requestFrom(8,25);    // request 15 bytes from slave device #8
  delay(50); // Giving time to GPS to copy all the coordinates into buffer
  if(myFile) //Checks if the file in SD card is opened properly
  {
@@ -228,16 +228,16 @@ void loop() {
     Serial.print(c); // print the character
     lcd.print(c);
   }
-  myFile.print(", ");//When !Wire.available(), do this
-  myFile.close();
- getgyro=1; //Give permission to subsequent gyro code to run
- Serial.println();
- telapsed=millis();
- Serial.print("Iteration number: ");
- iter=iter+1;
- Serial.println(iter);
- Serial.print("Time Elapsed");
- Serial.println(telapsed);
+ myFile.print(", ");//When !Wire.available(), do this
+myFile.close();
+getgyro=1; //Give permission to subsequent gyro code to run
+Serial.println();
+telapsed=millis();
+Serial.print("Iteration number: ");
+iter=iter+1;
+Serial.println(iter);
+Serial.print("Time Elapsed");
+Serial.println(telapsed);
 }
 else;
  }
@@ -303,6 +303,9 @@ else;
 
 valuesPackage obj;
 
+obj.p = ypr[0] * 180/M_PI; //formula to calculate yaw
+
+
 obj.p = ypr[1] * 180/M_PI; //formula to calculate pitch
 obj.r = ypr[2] * 180/M_PI; //formula to calculate roll
             valuesArr[index%2] = obj;
@@ -311,9 +314,10 @@ index++;
   if(index > 50) //First 50 values are disregarded since gyro needs time to stabilize
   {
     int lastIndex =  (index+1)%2; //0 if index==1 otherwise 1
+    yaw = valuesArr[index%2].y - valuesArr[lastIndex].y; //difference in values intensity of the bump
     pitch = valuesArr[index%2].p - valuesArr[lastIndex].p; //difference in values intensity of the bump
     roll = valuesArr[index%2].r - valuesArr[lastIndex].r;
-    if(pitch<0)
+    /*if(pitch<0)
     pitch= (-1*pitch); 
     else;
     if(roll<0)
@@ -324,9 +328,10 @@ index++;
     bumpval= round(pitch+roll); //pitch and roll combined to make an integer value
     //pitch = abs(pitch);
     //roll = abs(roll);
-  
+  */
   
      Serial.print("-----------------------");
+        Serial.print(yaw);Serial.print(" ");
         Serial.print(pitch);Serial.print(" ");
       Serial.println(roll);Serial.println();
       //Writing Data to SD card now
@@ -337,19 +342,28 @@ index++;
     //lcd.print("Writing gyro.txt...");
     delay(30);
     lcd.setCursor(0,1);
-    //myFile.print(pitch);
-    //lcd.print(pitch);
-    //myFile.print(", ");
-    //lcd.print(", ");
-    //myFile.print(roll);
-    //lcd.print(roll);
-    //myFile.print(", ");
-    //lcd.print(", ");
-    lcd.print(bumpval);
-    myFile.print(bumpval);
+    myFile.print(yaw);
+    delay(30);
+    lcd.print(yaw);
     myFile.print(", ");
     lcd.print(", ");
+ 
+    myFile.print(pitch);
+    delay(30);
+    lcd.print(pitch);
+    myFile.print(", ");
+    lcd.print(", ");
+    myFile.print(roll);
+    delay(30);
+    lcd.print(roll);
+    myFile.print(", ");
+    lcd.print(", ");
+    //lcd.print(bumpval);
+    //myFile.print(bumpval);
+    //myFile.print(", ");
+    //lcd.print(", ");
     myFile.println();
+    
     // close the file:
     myFile.close();
     Serial.println("done.");   
