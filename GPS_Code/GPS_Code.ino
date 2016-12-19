@@ -16,12 +16,12 @@ void setup()
   Wire.onRequest(requestEvent); // regi
 }
   //3147636, 7434279
-unsigned long time=12000000, date, fix_age;
-  long lat = 1000000, lon = 1000000;
+unsigned long time_=12000000, date_=111111, fix_age=99;
+  long lat_ = 1000000, lon_ = 1000000;
 void requestEvent() {
-  String d = String(lat) + "," + String (lon) + "," + String (time);
-  char buffer[26];
-  d.toCharArray(buffer, 26);
+  String d = String(lat_) + ", " + String(lon_) + ", " + String(time_) + ", " + String(fix_age);// + ", " + String(time_);//+ ", " + String(fix_age);
+  char buffer[30];
+  d.toCharArray(buffer, 31);
   Wire.write(buffer); // respond with message of 6 bytes
   Serial.println(buffer);
   // as expected by master
@@ -37,11 +37,12 @@ void loop() // run over and over
           Serial.println("Acquired Data");
           Serial.println("-------------");
     
-          gps.get_position(&lat, &lon);
-          gps.get_datetime(&date, &time, &fix_age);
+          gps.get_position(&lat_, &lon_);
+          gps.get_datetime(&date_, &time_, &fix_age);
 
-          Serial.print("Lat/Long(10^-5 deg): "); Serial.print(lat); Serial.print(", "); Serial.print(lon); Serial.print(time); 
+          Serial.print("Lat/Long(10^-5 deg): "); Serial.print(lat_); Serial.print(", "); Serial.print(lon_);Serial.print(", "); Serial.print(time_);Serial.print(", ");Serial.print(fix_age);Serial.print(", ");Serial.print(date_); 
           //delay(500);
+          
           Serial.println();
       }
     }

@@ -83,7 +83,7 @@ class valuesPackage // a special class is created to keep two values of pitch as
 };
 
 int index = 0; // index is used for controlling the stabilizing time of the gyro
-valuesPackage valuesArr[2]; //two values are kept in each cycle (of pitch and roll) which are later subtracted from each other to detect a bump
+valuesPackage valuesArr[1]; //two values are kept in each cycle (of pitch and roll) which are later subtracted from each other to detect a bump
 
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
@@ -309,15 +309,15 @@ obj.y = ypr[0] * 180/M_PI; //formula to calculate yaw
 
 obj.p = ypr[1] * 180/M_PI; //formula to calculate pitch
 obj.r = ypr[2] * 180/M_PI; //formula to calculate roll
-            valuesArr[index%2] = obj;
+//            valuesArr[index%2] = obj;
 index++;
              
   if(index > 50) //First 50 values are disregarded since gyro needs time to stabilize
   {
-    int lastIndex =  (index+1)%2; //0 if index==1 otherwise 1
-    yaw = valuesArr[index%2].y - valuesArr[lastIndex].y; //difference in values intensity of the bump
-    pitch = valuesArr[index%2].p - valuesArr[lastIndex].p; //difference in values intensity of the bump
-    roll = valuesArr[index%2].r - valuesArr[lastIndex].r;
+  //  int lastIndex =  (index+1)%2; //0 if index==1 otherwise 1
+    yaw = valuesArr[index].y;// - valuesArr[lastIndex].y; //difference in values intensity of the bump
+    pitch = valuesArr[index].p;// - valuesArr[lastIndex].p; //difference in values intensity of the bump
+    roll = valuesArr[index].r;// - valuesArr[lastIndex].r;
     /*if(pitch<0)
     pitch= (-1*pitch); 
     else;
